@@ -1,10 +1,24 @@
-import { gateway } from "@ai-sdk/gateway";
+// lib/ai/providers.ts
+
+import OpenAI from "openai";
 import {
   customProvider,
   extractReasoningMiddleware,
   wrapLanguageModel,
 } from "ai";
 import { isTestEnvironment } from "../constants";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Optional: map your model IDs to real OpenAI models
+const modelMap = {
+  "chat-model": "gpt-4o-mini",
+  "chat-model-reasoning": "o3-mini",
+  "title-model": "gpt-4o-mini",
+  "artifact-model": "gpt-4o-mini",
+};
 
 export const myProvider = isTestEnvironment
   ? (() => {
@@ -14,6 +28,7 @@ export const myProvider = isTestEnvironment
         reasoningModel,
         titleModel,
       } = require("./models.mock");
+
       return customProvider({
         languageModels: {
           "chat-model": chatModel,
@@ -25,12 +40,32 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        "chat-model": gateway.languageModel("xai/grok-2-vision-1212"),
+        "chat-model": {
+          providerId: "openai-direct",
+          modelId: modelMap["chat-model"],
+          client: openai,
+        },
+
+        // Add reasoning middleware
         "chat-model-reasoning": wrapLanguageModel({
-          model: gateway.languageModel("xai/grok-3-mini"),
+          model: {
+            providerId: "openai-direct",
+            modelId: modelMap["chat-model-reasoning"],
+            client: openai,
+          },
           middleware: extractReasoningMiddleware({ tagName: "think" }),
         }),
-        "title-model": gateway.languageModel("xai/grok-2-1212"),
-        "artifact-model": gateway.languageModel("xai/grok-2-1212"),
+
+        "title-model": {
+          providerId: "openai-direct",
+          modelId: modelMap["title-model"],
+          client: openai,
+        },
+
+        "artifact-model": {
+          providerId: "openai-direct",
+          modelId: modelMap["artifact-model"],
+          client: openai,
+        },
       },
     });
