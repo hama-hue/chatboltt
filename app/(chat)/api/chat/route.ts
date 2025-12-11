@@ -1,3 +1,4 @@
+// app/api/chat/route.ts
 import { geolocation } from "@vercel/functions";
 import {
   convertToModelMessages,
@@ -6,7 +7,10 @@ import {
   smoothStream,
   stepCountIs,
   streamText,
+  wrapLanguageModel,
+  extractReasoningMiddleware,
 } from "ai";
+import OpenAI from "openai";
 import { unstable_cache as cache } from "next/cache";
 import { after } from "next/server";
 import {
@@ -21,7 +25,6 @@ import type { VisibilityType } from "@/components/visibility-selector";
 import { entitlementsByUserType } from "@/lib/ai/entitlements";
 import type { ChatModel } from "@/lib/ai/models";
 import { type RequestHints, systemPrompt } from "@/lib/ai/prompts";
-import { myProvider } from "@/lib/ai/providers";
 import { createDocument } from "@/lib/ai/tools/create-document";
 import { getWeather } from "@/lib/ai/tools/get-weather";
 import { requestSuggestions } from "@/lib/ai/tools/request-suggestions";
@@ -83,6 +86,86 @@ export function getStreamContext() {
   }
 
   return globalStreamContext;
+}
+
+/**
+ * === Direct provider clients (NO GATEWAY) ===
+ *
+ * We create lightweight OpenAI-compatible clients for:
+ *  - OpenAI (standard)
+ *  - Grok (x.ai) via GROK_API_KEY + baseURL
+ *  - DeepSeek via DEEPSEEK_API_KEY + baseURL
+ *
+ * These are used to build `model` descriptors that streamText accepts.
+ *
+ * Make sure the API keys are present in environment variables on Vercel:
+ * OPENAI_API_KEY, GROK_API_KEY, DEEPSEEK_API_KEY
+ */
+const openaiClient = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+const grokClient = new OpenAI({
+  apiKey: process.env.GROK_API_KEY,
+  // grok (x.ai) is OpenAI-compatible; use their base URL if needed
+  baseURL: process.env.GROK_BASE_URL ?? "https://api.x.ai/v1",
+});
+
+const deepseekClient = new OpenAI({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  baseURL: process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com",
+});
+
+/**
+ * Map logical model IDs to (client, modelId).
+ * These are the mappings you requested (latest versions):
+ *  - chat-model -> grok-2-latest (grokClient)
+ *  - chat-model-reasoning -> o3-mini (openaiClient) with reasoning middleware
+ *  - title-model -> deepseek-chat (deepseekClient)
+ *  - artifact-model -> grok-2-latest (grokClient)
+ */
+function resolveModelDescriptor(selectedChatModel: ChatModel["id"]) {
+  switch (selectedChatModel) {
+    case "chat-model":
+      return {
+        providerId: "grok-direct",
+        modelId: "grok-2-latest",
+        client: grokClient,
+      };
+
+    case "chat-model-reasoning":
+      // Wrap with reasoning middleware so `think` tags are extracted
+      return wrapLanguageModel({
+        model: {
+          providerId: "openai-direct",
+          modelId: "o3-mini",
+          client: openaiClient,
+        },
+        middleware: extractReasoningMiddleware({ tagName: "think" }),
+      });
+
+    case "title-model":
+      return {
+        providerId: "deepseek-direct",
+        modelId: "deepseek-chat",
+        client: deepseekClient,
+      };
+
+    case "artifact-model":
+      return {
+        providerId: "grok-direct",
+        modelId: "grok-2-latest",
+        client: grokClient,
+      };
+
+    default:
+      // Fallback to a safe OpenAI model
+      return {
+        providerId: "openai-direct",
+        modelId: "gpt-4o-mini",
+        client: openaiClient,
+      };
+  }
 }
 
 export async function POST(request: Request) {
@@ -177,10 +260,13 @@ export async function POST(request: Request) {
 
     let finalMergedUsage: AppUsage | undefined;
 
+    // Resolve the exact model descriptor to pass to streamText (direct clients, no gateway)
+    const modelDescriptor = resolveModelDescriptor(selectedChatModel);
+
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
         const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
+          model: modelDescriptor,
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: convertToModelMessages(uiMessages),
           stopWhen: stepCountIs(5),
@@ -211,7 +297,12 @@ export async function POST(request: Request) {
             try {
               const providers = await getTokenlensCatalog();
               const modelId =
-                myProvider.languageModel(selectedChatModel).modelId;
+                // if wrapLanguageModel was used it may be an object; try to access modelId safely
+                typeof modelDescriptor === "object" && "modelId" in modelDescriptor
+                  ? // @ts-expect-error - modelDescriptor typing varies
+                    (modelDescriptor as any).modelId
+                  : undefined;
+
               if (!modelId) {
                 finalMergedUsage = usage;
                 dataStream.write({
@@ -303,6 +394,7 @@ export async function POST(request: Request) {
         "AI Gateway requires a valid credit card on file to service requests"
       )
     ) {
+      // This error shouldn't occur now, but keep the friendly mapping if any upstream lib still throws it
       return new ChatSDKError("bad_request:activate_gateway").toResponse();
     }
 
