@@ -8,18 +8,42 @@ import {
 } from "ai";
 import { isTestEnvironment } from "../constants";
 
+// ---------- PROVIDER CLIENTS (DIRECT, NO GATEWAY) ----------
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Optional: map your model IDs to real OpenAI models
+const deepseek = new OpenAI({
+  baseURL: "https://api.deepseek.com",
+  apiKey: process.env.DEEPSEEK_API_KEY,
+});
+
+const grok = new OpenAI({
+  baseURL: "https://api.x.ai/v1",
+  apiKey: process.env.GROK_API_KEY,
+});
+
+// ---------- MODEL ASSIGNMENTS (YOUR CHOICES) ----------
 const modelMap = {
-  "chat-model": "gpt-4o-mini",
-  "chat-model-reasoning": "o3-mini",
-  "title-model": "gpt-4o-mini",
-  "artifact-model": "gpt-4o-mini",
+  "chat-model": {
+    client: grok,
+    modelId: "grok-2-latest",
+  },
+  "chat-model-reasoning": {
+    client: openai,
+    modelId: "o3-mini",
+  },
+  "title-model": {
+    client: deepseek,
+    modelId: "deepseek-chat",
+  },
+  "artifact-model": {
+    client: grok,
+    modelId: "grok-2-latest",
+  },
 };
 
+// ---------- PROVIDER DEFINITION ----------
 export const myProvider = isTestEnvironment
   ? (() => {
       const {
@@ -41,31 +65,30 @@ export const myProvider = isTestEnvironment
   : customProvider({
       languageModels: {
         "chat-model": {
-          providerId: "openai-direct",
-          modelId: modelMap["chat-model"],
-          client: openai,
+          providerId: "grok-direct",
+          modelId: modelMap["chat-model"].modelId,
+          client: modelMap["chat-model"].client,
         },
 
-        // Add reasoning middleware
         "chat-model-reasoning": wrapLanguageModel({
           model: {
             providerId: "openai-direct",
-            modelId: modelMap["chat-model-reasoning"],
-            client: openai,
+            modelId: modelMap["chat-model-reasoning"].modelId,
+            client: modelMap["chat-model-reasoning"].client,
           },
           middleware: extractReasoningMiddleware({ tagName: "think" }),
         }),
 
         "title-model": {
-          providerId: "openai-direct",
-          modelId: modelMap["title-model"],
-          client: openai,
+          providerId: "deepseek-direct",
+          modelId: modelMap["title-model"].modelId,
+          client: modelMap["title-model"].client,
         },
 
         "artifact-model": {
-          providerId: "openai-direct",
-          modelId: modelMap["artifact-model"],
-          client: openai,
+          providerId: "grok-direct",
+          modelId: modelMap["artifact-model"].modelId,
+          client: modelMap["artifact-model"].client,
         },
       },
     });
