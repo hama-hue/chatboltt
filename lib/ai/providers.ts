@@ -1,49 +1,10 @@
-// lib/ai/providers.ts
-
+import { customProvider } from "ai";
 import OpenAI from "openai";
-import {
-  customProvider,
-  extractReasoningMiddleware,
-  wrapLanguageModel,
-} from "ai";
+import { Xai } from "@xai/sdk";
+import DeepSeek from "deepseek";
+import { extractReasoningMiddleware, wrapLanguageModel } from "ai";
 import { isTestEnvironment } from "../constants";
 
-// ---------- PROVIDER CLIENTS (DIRECT, NO GATEWAY) ----------
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const deepseek = new OpenAI({
-  baseURL: "https://api.deepseek.com",
-  apiKey: process.env.DEEPSEEK_API_KEY,
-});
-
-const grok = new OpenAI({
-  baseURL: "https://api.x.ai/v1",
-  apiKey: process.env.GROK_API_KEY,
-});
-
-// ---------- MODEL ASSIGNMENTS (YOUR CHOICES) ----------
-const modelMap = {
-  "chat-model": {
-    client: grok,
-    modelId: "grok-2-latest",
-  },
-  "chat-model-reasoning": {
-    client: openai,
-    modelId: "o3-mini",
-  },
-  "title-model": {
-    client: deepseek,
-    modelId: "deepseek-chat",
-  },
-  "artifact-model": {
-    client: grok,
-    modelId: "grok-2-latest",
-  },
-};
-
-// ---------- PROVIDER DEFINITION ----------
 export const myProvider = isTestEnvironment
   ? (() => {
       const {
@@ -52,7 +13,6 @@ export const myProvider = isTestEnvironment
         reasoningModel,
         titleModel,
       } = require("./models.mock");
-
       return customProvider({
         languageModels: {
           "chat-model": chatModel,
@@ -62,33 +22,35 @@ export const myProvider = isTestEnvironment
         },
       });
     })()
-  : customProvider({
-      languageModels: {
-        "chat-model": {
-          providerId: "grok-direct",
-          modelId: modelMap["chat-model"].modelId,
-          client: modelMap["chat-model"].client,
-        },
+  : (() => {
+      const xai = new Xai({
+        apiKey: process.env.XAI_API_KEY!,
+      });
 
-        "chat-model-reasoning": wrapLanguageModel({
-          model: {
-            providerId: "openai-direct",
-            modelId: modelMap["chat-model-reasoning"].modelId,
-            client: modelMap["chat-model-reasoning"].client,
-          },
-          middleware: extractReasoningMiddleware({ tagName: "think" }),
-        }),
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY!,
+      });
 
-        "title-model": {
-          providerId: "deepseek-direct",
-          modelId: modelMap["title-model"].modelId,
-          client: modelMap["title-model"].client,
-        },
+      const deepseek = new DeepSeek({
+        apiKey: process.env.DEEPSEEK_API_KEY!,
+      });
 
-        "artifact-model": {
-          providerId: "grok-direct",
-          modelId: modelMap["artifact-model"].modelId,
-          client: modelMap["artifact-model"].client,
+      return customProvider({
+        languageModels: {
+          // ➤ Main chat model (Grok)
+          "chat-model": xai.languageModel("grok-2-latest"),
+
+          // ➤ Reasoning model (GPT)
+          "chat-model-reasoning": wrapLanguageModel({
+            model: openai.languageModel("gpt-4o"), // latest reasoning-capable
+            middleware: extractReasoningMiddleware({ tagName: "think" }),
+          }),
+
+          // ➤ Title model (DeepSeek)
+          "title-model": deepseek.languageModel("deepseek-chat"),
+
+          // ➤ Artifact model (Grok)
+          "artifact-model": xai.languageModel("grok-2-latest"),
         },
-      },
-    });
+      });
+    })();
