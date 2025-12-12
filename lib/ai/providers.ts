@@ -24,7 +24,7 @@ export const myProvider = isTestEnvironment
     })()
   : (() => {
       const xai = createXai({
-        apiKey: process.env.XAI_API_KEY!,
+        apiKey: process.env.GROK_API_KEY!,
       });
 
       const openai = createOpenAI({
