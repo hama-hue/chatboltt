@@ -527,7 +527,7 @@ export async function getMessageCountByUserId({
 }: {
   id: string;
   differenceInHours: number;
-}) {
+}) Promise<number> {
   try {
     const twentyFourHoursAgo = new Date(
       Date.now() - differenceInHours * 60 * 60 * 1000
