@@ -527,14 +527,14 @@ export async function getMessageCountByUserId({
 }: {
   id: string;
   differenceInHours: number;
-}) Promise<number> {
+}): Promise<number> {
   try {
     const twentyFourHoursAgo = new Date(
       Date.now() - differenceInHours * 60 * 60 * 1000
     );
 
     const [stats] = await db
-      .select({ count: count(message.id) })
+      .select({ count: count(message.id).mapWith(Number) }) // ensures numeric type
       .from(message)
       .innerJoin(chat, eq(message.chatId, chat.id))
       .where(
@@ -546,6 +546,7 @@ export async function getMessageCountByUserId({
       )
       .execute();
 
+    // stats.count is now guaranteed to be a number
     return stats?.count ?? 0;
   } catch (_error) {
     throw new ChatSDKError(
