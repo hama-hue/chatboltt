@@ -143,7 +143,12 @@ function resolveModelDescriptor(selectedChatModel: ChatModel["id"]) {
 
     // === DEEPSEEK (title generation) ===
     case "title-model":
-      return deepseek("deepseek-chat");
+      try {
+       return deepseek("deepseek-chat");
+    } catch (e) {
+       console.error("DeepSeek failed, switching to fallback", e);
+       return openaiClient("gpt-4o-mini");
+    }
 
     // === GROK again for artifacts ===
     case "artifact-model":
