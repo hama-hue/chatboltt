@@ -10,9 +10,9 @@ import {
   wrapLanguageModel,
   extractReasoningMiddleware,
 } from "ai";
-import { deepseek } from "@ai-sdk/deepseek";
-import { xai } from "@ai-sdk/xai";
-import OpenAI from "openai";
+import { createOpenAI } from '@ai-sdk/openai';
+import { createXai } from '@ai-sdk/xai';
+import { createDeepSeek } from '@ai-sdk/deepseek';
 import { unstable_cache as cache } from "next/cache";
 import { after } from "next/server";
 import {
@@ -104,17 +104,17 @@ export function getStreamContext() {
  * Make sure the API keys are present in environment variables on Vercel:
  * OPENAI_API_KEY, GROK_API_KEY, DEEPSEEK_API_KEY
  */
-const openaiClient = new OpenAI({
+const openaiClient = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-const grokClient = new OpenAI({
+const grokClient = createXai({
   apiKey: process.env.GROK_API_KEY,
   // grok (x.ai) is OpenAI-compatible; use their base URL if needed
   baseURL: process.env.GROK_BASE_URL ?? "https://api.x.ai/v1",
 });
 
-const deepseekClient = new OpenAI({
+const deepseek = createDeepSeek({
   apiKey: process.env.DEEPSEEK_API_KEY,
   baseURL: process.env.DEEPSEEK_BASE_URL ?? "https://api.deepseek.com",
 });
@@ -132,12 +132,12 @@ function resolveModelDescriptor(selectedChatModel: ChatModel["id"]) {
 
     // === GROK (latest) ===
     case "chat-model":
-      return xai("grok-2-latest");
+      return grokClient("grok-2-latest");
 
     // === OPENAI with reasoning extraction ===
     case "chat-model-reasoning":
       return wrapLanguageModel({
-        model: new OpenAI("o3-mini"),
+        model: openaiClient("o3-mini"),
         middleware: extractReasoningMiddleware({ tagName: "think" }),
       });
 
@@ -147,11 +147,11 @@ function resolveModelDescriptor(selectedChatModel: ChatModel["id"]) {
 
     // === GROK again for artifacts ===
     case "artifact-model":
-      return xai("grok-2-latest");
+      return grokClient("grok-2-latest");
 
     // === fallback ===
     default:
-      return new OpenAI("gpt-4o-mini");
+      return openaiClient("gpt-4o-mini");
   }
 }
 
@@ -191,7 +191,7 @@ export async function POST(request: Request) {
       differenceInHours: 24,
     });
 
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
+    if (messageCount > 'entitlementsByUserType[userType].maxMessagesPerDay') {
       return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
@@ -286,7 +286,7 @@ export async function POST(request: Request) {
               const modelId =
                 // if wrapLanguageModel was used it may be an object; try to access modelId safely
                 typeof modelDescriptor === "object" && "modelId" in modelDescriptor
-                  ? // @ts-expect-error - modelDescriptor typing varies
+                  ? // ts-expect-error - modelDescriptor typing varies
                     (modelDescriptor as any).modelId
                   : undefined;
 
