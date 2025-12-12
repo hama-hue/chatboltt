@@ -47,7 +47,7 @@ export const myProvider = isTestEnvironment
           }),
 
           // ➤ Title model (DeepSeek)
-          "title-model": deepseek.languageModel("deepseek-chat"),
+          "title-model": openai.languageModel("gpt-4o"), 
 
           // ➤ Artifact model (Grok)
           "artifact-model": xai.languageModel("grok-2-latest"),
