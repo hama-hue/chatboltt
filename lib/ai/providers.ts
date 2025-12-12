@@ -1,6 +1,6 @@
 import { customProvider } from "ai";
 import OpenAI from "openai";
-import { Xai } from "@xai/sdk";
+import { Xai } from "@ai-sdk/xai";
 import DeepSeek from "deepseek";
 import { extractReasoningMiddleware, wrapLanguageModel } from "ai";
 import { isTestEnvironment } from "../constants";
