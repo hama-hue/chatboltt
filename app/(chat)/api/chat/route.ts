@@ -10,6 +10,8 @@ import {
   wrapLanguageModel,
   extractReasoningMiddleware,
 } from "ai";
+import { deepseek } from "@ai-sdk/deepseek";
+import { xai } from "@ai-sdk/xai";
 import OpenAI from "openai";
 import { unstable_cache as cache } from "next/cache";
 import { after } from "next/server";
@@ -47,6 +49,7 @@ import type { AppUsage } from "@/lib/usage";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
 import { type PostRequestBody, postRequestBodySchema } from "./schema";
+import { LanguageModelV2CallOptions, LanguageModelV2Content, LanguageModelV2FinishReason, LanguageModelV2Usage, SharedV2ProviderMetadata, LanguageModelV2ResponseMetadata, SharedV2Headers, LanguageModelV2CallWarning, LanguageModelV2StreamPart } from "@ai-sdk/provider";
 
 export const maxDuration = 60;
 
@@ -126,45 +129,29 @@ const deepseekClient = new OpenAI({
  */
 function resolveModelDescriptor(selectedChatModel: ChatModel["id"]) {
   switch (selectedChatModel) {
-    case "chat-model":
-      return {
-        providerId: "grok-direct",
-        modelId: "grok-2-latest",
-        client: grokClient,
-      };
 
+    // === GROK (latest) ===
+    case "chat-model":
+      return xai("grok-2-latest");
+
+    // === OPENAI with reasoning extraction ===
     case "chat-model-reasoning":
-      // Wrap with reasoning middleware so `think` tags are extracted
       return wrapLanguageModel({
-        model: {
-          providerId: "openai-direct",
-          modelId: "o3-mini",
-          client: openaiClient,
-        },
+        model: new OpenAI("o3-mini"),
         middleware: extractReasoningMiddleware({ tagName: "think" }),
       });
 
+    // === DEEPSEEK (title generation) ===
     case "title-model":
-      return {
-        providerId: "deepseek-direct",
-        modelId: "deepseek-chat",
-        client: deepseekClient,
-      };
+      return deepseek("deepseek-chat");
 
+    // === GROK again for artifacts ===
     case "artifact-model":
-      return {
-        providerId: "grok-direct",
-        modelId: "grok-2-latest",
-        client: grokClient,
-      };
+      return xai("grok-2-latest");
 
+    // === fallback ===
     default:
-      // Fallback to a safe OpenAI model
-      return {
-        providerId: "openai-direct",
-        modelId: "gpt-4o-mini",
-        client: openaiClient,
-      };
+      return new OpenAI("gpt-4o-mini");
   }
 }
 

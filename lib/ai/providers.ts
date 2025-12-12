@@ -1,7 +1,7 @@
 import { customProvider } from "ai";
 import OpenAI from "openai";
-import { Xai } from "@ai-sdk/xai";
-import DeepSeek from "deepseek";
+import { xAI } from "@ai-sdk/xai";
+import DeepSeek from "@ai-sdk/deepseek";
 import { extractReasoningMiddleware, wrapLanguageModel } from "ai";
 import { isTestEnvironment } from "../constants";
 
@@ -23,7 +23,7 @@ export const myProvider = isTestEnvironment
       });
     })()
   : (() => {
-      const xai = new Xai({
+      const xai = new xAI({
         apiKey: process.env.XAI_API_KEY!,
       });
 
