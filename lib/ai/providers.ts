@@ -1,4 +1,5 @@
 import { gateway } from "@ai-sdk/gateway";
+import { groq } from "@ai-sdk/groq";
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -25,12 +26,19 @@ export const myProvider = isTestEnvironment
     })()
   : customProvider({
       languageModels: {
-        "chat-model": gateway.languageModel("xai/grok-2-vision-1212"),
+        // MAIN CHAT (FREE)
+        "chat-model": groq("llama-3.1-8b-instant"),
+
+        // REASONING MODEL (FREE)
         "chat-model-reasoning": wrapLanguageModel({
-          model: gateway.languageModel("xai/grok-3-mini"),
+          model: groq("mixtral-8x7b-32768"),
           middleware: extractReasoningMiddleware({ tagName: "think" }),
         }),
-        "title-model": gateway.languageModel("xai/grok-2-1212"),
-        "artifact-model": gateway.languageModel("xai/grok-2-1212"),
+
+        // TITLES
+        "title-model": groq("llama-3.1-8b-instant"),
+
+        // ARTIFACTS
+        "artifact-model": groq("llama-3.1-8b-instant"),
       },
     });
