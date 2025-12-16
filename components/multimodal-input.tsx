@@ -41,6 +41,7 @@ import {
   PaperclipIcon,
   StopIcon,
 } from "./icons";
+import { VoiceInput } from "./VoiceInput";
 import { PreviewAttachment } from "./preview-attachment";
 import { SuggestedActions } from "./suggested-actions";
 import { Button } from "./ui/button";
@@ -373,6 +374,16 @@ function PureMultimodalInput({
               fileInputRef={fileInputRef}
               selectedModelId={selectedModelId}
               status={status}
+            />
+             <VoiceInput
+                disabled={status !== "ready"}
+                onResult={(text) => {
+                setInput(text);
+                sendMessage({
+                    role: "user",
+                    parts: [{ type: "text", text }],
+               });
+            }}
             />
             <ModelSelectorCompact
               onModelChange={onModelChange}
