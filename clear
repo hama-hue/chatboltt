@@ -1,0 +1,188 @@
+[33mcommit d7a38cc4af044a9b000ed4b7adf7025052a1bc18[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 21:21:49 2025 +0530
+
+    updated route.ts providers.ts
+
+[33mcommit ac1bb32550515bb7cd2398ccf6b40972436534cb[m
+Merge: 1439fe9 e23b150
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 21:03:31 2025 +0530
+
+    Merge branch 'main' of https://github.com/hama-hue/chatboltt
+
+[33mcommit 1439fe9f9b9d26e668337c59671aaac3129e5f3f[m
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 21:03:06 2025 +0530
+
+    updated route.ts
+
+[33mcommit e23b1506d3d8ad17df3207f6037df20dc4ca39a8[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Fri Dec 12 20:28:44 2025 +0530
+
+    Change XAI API key environment variable
+
+[33mcommit d7da5e40e714ea54d4a38f9f112e1684370e5528[m
+Merge: 462db59 eab995b
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 19:39:56 2025 +0530
+
+    Merge branch 'main' of https://github.com/hama-hue/chatboltt
+    updated vulnarable dependencies
+
+[33mcommit 462db592da0afc1b77e1f17e794d43600e0628f3[m
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 19:38:59 2025 +0530
+
+    removed caching in next.connfig
+
+[33mcommit eab995b98ea35ba64c29e2b0bb701d558ab34e06[m
+Merge: f8fddc0 48ab1f5
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Fri Dec 12 19:36:20 2025 +0530
+
+    Merge pull request #2 from hama-hue/vercel/react-server-components-cve-vu-s4ke1f
+    
+    Fix React Server Components CVE vulnerabilities
+
+[33mcommit 48ab1f58bb7363ad604b25e6137c91cfe6f48753[m
+Author: Vercel <vercel[bot]@users.noreply.github.com>
+Date:   Fri Dec 12 14:04:38 2025 +0000
+
+    Fix React Server Components CVE vulnerabilities
+    
+    Updated dependencies to fix Next.js and React CVE vulnerabilities.
+    
+    The fix-react2shell-next tool automatically updated the following packages to their secure versions:
+    - next
+    - react-server-dom-webpack
+    - react-server-dom-parcel
+    - react-server-dom-turbopack
+    
+    All package.json files have been scanned and vulnerable versions have been patched to the correct fixed versions based on the official React advisory.
+    
+    Co-authored-by: Vercel <vercel[bot]@users.noreply.github.com>
+
+[33mcommit f8fddc034bdc70e7fa122881115543577c49e79e[m
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 19:28:45 2025 +0530
+
+    updated queries.ts
+
+[33mcommit 1a264c2a658e54372ff767ff6ef8b7bf56ae5169[m
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 17:55:00 2025 +0530
+
+    updated route.ts
+
+[33mcommit 554bb4b6ce83c99ca764d71567ab4d9866d5caca[m
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 17:34:59 2025 +0530
+
+    Fix lockfile
+
+[33mcommit 3c628bc1082236a2f03a8506ca9272de431eb1d4[m
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 17:32:45 2025 +0530
+
+    updated route.ts
+
+[33mcommit c466c201f8795c9777c23f5be001473a8775a941[m
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 17:02:16 2025 +0530
+
+    updated route.ts
+
+[33mcommit 12c506da48044725193b9e45be3e58443029a91c[m
+Author: hama-hue <anishasingh1101@gmail.com>
+Date:   Fri Dec 12 15:59:57 2025 +0530
+
+    Fix lockfile
+
+[33mcommit 0b58b812860d57a0c98b618dd5175422d53ebd84[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Fri Dec 12 15:01:31 2025 +0530
+
+    Update package.json
+
+[33mcommit d0356528111f3923dd875ef71967f56fcc3d987a[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Fri Dec 12 14:58:54 2025 +0530
+
+    Update @opentelemetry/api-logs version to 0.49.1
+
+[33mcommit ffbef099cfab108f68c028e66277fdabd0b488e0[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Fri Dec 12 14:08:29 2025 +0530
+
+    Delete pnpm-lock.yaml
+
+[33mcommit d00bb6aaed990e0cd5ae1566b46cd33dfeaf4bfc[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Fri Dec 12 14:02:24 2025 +0530
+
+    Update dependencies to latest versions
+
+[33mcommit f7f1ab15c01d47f0aa35233bfc438ad0283f3a0c[m
+Merge: 9be4436 82f6173
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Fri Dec 12 13:48:49 2025 +0530
+
+    Merge pull request #1 from hama-hue/vercel/react-server-components-cve-vu-ip4pdm
+    
+    Fix React Server Components CVE vulnerabilities
+
+[33mcommit 82f617356f767ef9bde25c8d5a69fc5c2aeb3533[m[33m ([m[1;31morigin/vercel/react-server-components-cve-vu-ip4pdm[m[33m)[m
+Author: Vercel <vercel[bot]@users.noreply.github.com>
+Date:   Fri Dec 12 08:17:40 2025 +0000
+
+    Fix React Server Components CVE vulnerabilities
+    
+    Updated dependencies to fix Next.js and React CVE vulnerabilities.
+    
+    The fix-react2shell-next tool automatically updated the following packages to their secure versions:
+    - next
+    - react-server-dom-webpack
+    - react-server-dom-parcel
+    - react-server-dom-turbopack
+    
+    All package.json files have been scanned and vulnerable versions have been patched to the correct fixed versions based on the official React advisory.
+    
+    Co-authored-by: Vercel <vercel[bot]@users.noreply.github.com>
+
+[33mcommit 9be4436097e43167120811a2eccb2bf1b60cd971[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Thu Dec 11 21:56:52 2025 +0530
+
+    Refactor AI providers to use new SDKs
+
+[33mcommit 6d1b71480384f17f20e58880c2abf0b8fd32ca91[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Thu Dec 11 21:38:07 2025 +0530
+
+    Implement OpenAI-compatible clients for multiple models
+    
+    Added OpenAI-compatible clients for Grok and DeepSeek, including model resolution logic.
+
+[33mcommit 489790c37e9092fe2c3a1fbf4417f1bb836d81e9[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Thu Dec 11 21:35:12 2025 +0530
+
+    Refactor AI provider clients and model assignments
+
+[33mcommit 3a065f5ada90970f0c927c9df182ba16eb22d785[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Thu Dec 11 21:26:53 2025 +0530
+
+    Integrate OpenAI client into AI provider
+    
+    Refactor AI provider to use OpenAI client with model mapping.
+
+[33mcommit f6107e5fc6e992fbde3ab2317392750abdc815a9[m
+Author: hama-hue <151660176+hama-hue@users.noreply.github.com>
+Date:   Sat Dec 6 14:48:46 2025 +0000
+
+    Initial commit
+    
+    Created from https://vercel.com/new
