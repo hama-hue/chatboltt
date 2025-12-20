@@ -20,6 +20,11 @@ import { toast } from "sonner";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
 import { saveChatModelAsCookie } from "@/app/(chat)/actions";
 import { SelectItem } from "@/components/ui/select";
+import { PaymentController } from "@/components/payments/PaymentController";
+import { detectPaymentIntent } from "@/lib/payments/intent";
+import { isConfirmation } from "@/lib/payments/confirmation";
+import { QrPaymentModal } from "@/components/payments/QrPaymentModal";
+import type { PaymentIntent } from "@/lib/payments/intent";
 import { chatModels } from "@/lib/ai/models";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import type { AppUsage } from "@/lib/usage";
@@ -106,6 +111,12 @@ function PureMultimodalInput({
     ""
   );
 
+  const [pendingPayment, setPendingPayment] =
+    useState<PaymentIntent | null>(null);
+
+  const [confirmedPayment, setConfirmedPayment] =
+    useState<PaymentIntent | null>(null);
+
   useEffect(() => {
     if (textareaRef.current) {
       const domValue = textareaRef.current.value;
@@ -131,6 +142,15 @@ function PureMultimodalInput({
 
   const submitForm = useCallback(() => {
     window.history.pushState({}, "", `/chat/${chatId}`);
+
+    const intent = detectPaymentIntent(input);
+
+    if (intent) {
+      setPendingPayment(intent);
+      setInput("");
+      return;
+    }
+
 
     sendMessage({
       role: "user",
@@ -375,16 +395,44 @@ function PureMultimodalInput({
               selectedModelId={selectedModelId}
               status={status}
             />
-             <VoiceInput
-                disabled={status !== "ready"}
-                onResult={(text) => {
+            <VoiceInput
+              disabled={status !== "ready"}
+              onResult={(text) => {
+                // 1️⃣ Detect payment intent
+                const intent = detectPaymentIntent(text);
+
+                if (intent) {
+                  setPendingPayment(intent);
+
+                  sendMessage({
+                    role: "assistant",
+                    parts: [
+                      {
+                        type: "text",
+                        text: `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`,
+                      },
+                    ],
+                  });
+                  return;
+                }
+
+                // 2️⃣ Confirmation
+                if (pendingPayment && isConfirmation(text)) {
+                  setConfirmedPayment(pendingPayment);
+                  setPendingPayment(null);
+                  return;
+                }
+
+                // 3️⃣ Normal chat
                 setInput(text);
                 sendMessage({
-                    role: "user",
-                    parts: [{ type: "text", text }],
-               });
-            }}
+                  role: "user",
+                  parts: [{ type: "text", text }],
+                });
+              }}
             />
+
+
             <ModelSelectorCompact
               onModelChange={onModelChange}
               selectedModelId={selectedModelId}
@@ -405,6 +453,15 @@ function PureMultimodalInput({
           )}
         </PromptInputToolbar>
       </PromptInput>
+      {/* Payment controller (Android → opens GPay) */}
+      {confirmedPayment && (
+        <PaymentController
+          intent={confirmedPayment}
+          onComplete={() => {
+            setConfirmedPayment(null);
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -542,3 +599,4 @@ function PureStopButton({
 }
 
 const StopButton = memo(PureStopButton);
+
