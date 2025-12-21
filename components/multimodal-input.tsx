@@ -397,6 +397,8 @@ function PureMultimodalInput({
             <VoiceInput
               disabled={status !== "ready"}
               onResult={(text) => {
+
+                setInput("");
                 // 1️⃣ Detect payment intent
                 const intent = detectPaymentIntent(text);
 
@@ -414,7 +416,6 @@ function PureMultimodalInput({
                   });
                   return;
                 }
-
                 // 2️⃣ Confirmation
                 if (pendingPayment && isConfirmation(text)) {
                   setConfirmedPayment(pendingPayment);
@@ -423,7 +424,6 @@ function PureMultimodalInput({
                 }
 
                 // 3️⃣ Normal chat
-                setInput(text);
                 sendMessage({
                   role: "user",
                   parts: [{ type: "text", text }],
