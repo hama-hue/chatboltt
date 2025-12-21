@@ -356,10 +356,7 @@ function PureMultimodalInput({
         className="rounded-xl border border-border bg-background p-3 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"
         onSubmit={(event) => {
           event.preventDefault();
-          if (pendingPayment) {
-            toast("Please confirm or cancel the payment");
-            return;
-          }
+
           if (status !== "ready") {
             toast.error("Please wait for the model to finish its response!");
           } else {
