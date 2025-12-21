@@ -51,20 +51,6 @@ import { SuggestedActions } from "./suggested-actions";
 import { Button } from "./ui/button";
 import type { VisibilityType } from "./visibility-selector";
 
-function systemChatMessage(
-  role: "assistant" | "user",
-  text: string
-): ChatMessage {
-  return {
-    id: crypto.randomUUID(),
-    role,
-    parts: [{ type: "text", text }],
-    metadata: {
-      createdAt: new Date().toISOString(),
-    },
-  };
-}
-
 function PureMultimodalInput({
   chatId,
   input,
@@ -160,10 +146,6 @@ function PureMultimodalInput({
     if (!text) return;
 
     if (pendingPayment && isConfirmation(text)) {
-      setMessages((prev) => [
-        ...prev,
-        systemChatMessage("user", text),
-      ]);
       setConfirmedPayment(pendingPayment);
       setPendingPayment(null);
       setInput("");
@@ -179,21 +161,24 @@ function PureMultimodalInput({
 
       setMessages((prev) => [
         ...prev,
-        systemChatMessage(
-          "assistant",
-          `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`
-        ),
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          parts: [
+            {
+              type: "text",
+              text: `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`,
+            },
+          ],
+        },
       ]);
-
-
       setInput("");
       setAttachments([]);
       setLocalStorageInput("");
       resetHeight();
       return;
+
     }
-
-
 
     sendMessage({
       role: "user",
@@ -370,7 +355,6 @@ function PureMultimodalInput({
         className="rounded-xl border border-border bg-background p-3 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"
         onSubmit={(event) => {
           event.preventDefault();
-
           if (status !== "ready") {
             toast.error("Please wait for the model to finish its response!");
           } else {
@@ -446,20 +430,23 @@ function PureMultimodalInput({
 
                   setMessages((prev) => [
                     ...prev,
-                    systemChatMessage(
-                      "assistant",
-                      `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`
-                    ),
+                    {
+                      id: crypto.randomUUID(),
+                      role: "assistant",
+                      parts: [
+                        {
+                          type: "text",
+                          text: `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`,
+                        },
+                      ],
+                    },
                   ]);
+
 
                   return;
                 }
                 // 2️⃣ Confirmation
                 if (pendingPayment && isConfirmation(text)) {
-                  setMessages((prev) => [
-                    ...prev,
-                    systemChatMessage("user", text),
-                  ]);
                   setConfirmedPayment(pendingPayment);
                   setPendingPayment(null);
                   return;
