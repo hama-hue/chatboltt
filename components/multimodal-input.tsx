@@ -171,15 +171,21 @@ function PureMultimodalInput({
     if (intent) {
       setPendingPayment(intent);
 
-      sendMessage({
-        role: "assistant",
-        parts: [
-          {
-            type: "text",
-            text: `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`,
-          },
-        ],
-      });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: crypto.randomUUID(),
+          role: "assistant",
+          parts: [
+            {
+              type: "text",
+              text: `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`,
+            },
+          ],
+        },
+      ]);
+
+
     }
 
     if (width && width > 768) {
@@ -341,6 +347,10 @@ function PureMultimodalInput({
         className="rounded-xl border border-border bg-background p-3 shadow-xs transition-all duration-200 focus-within:border-border hover:border-muted-foreground/50"
         onSubmit={(event) => {
           event.preventDefault();
+          if (pendingPayment) {
+            toast("Please confirm or cancel the payment");
+            return;
+          }
           if (status !== "ready") {
             toast.error("Please wait for the model to finish its response!");
           } else {
@@ -414,15 +424,21 @@ function PureMultimodalInput({
                 if (intent) {
                   setPendingPayment(intent);
 
-                  sendMessage({
-                    role: "assistant",
-                    parts: [
-                      {
-                        type: "text",
-                        text: `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`,
-                      },
-                    ],
-                  });
+                  setMessages((prev) => [
+                    ...prev,
+                    {
+                      id: crypto.randomUUID(),
+                      role: "assistant",
+                      parts: [
+                        {
+                          type: "text",
+                          text: `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`,
+                        },
+                      ],
+                    },
+                  ]);
+
+
                   return;
                 }
                 // 2️⃣ Confirmation
