@@ -142,14 +142,10 @@ function PureMultimodalInput({
   const submitForm = useCallback(() => {
     window.history.pushState({}, "", `/chat/${chatId}`);
 
-    const intent = detectPaymentIntent(input);
+    const text = input.trim();
+    if (!text) return;
 
-    if (intent) {
-      setPendingPayment(intent);
-      setInput("");
-      return;
-    }
-
+    const intent = detectPaymentIntent(text);
 
     sendMessage({
       role: "user",
@@ -167,10 +163,24 @@ function PureMultimodalInput({
       ],
     });
 
+    setInput("");
     setAttachments([]);
     setLocalStorageInput("");
     resetHeight();
-    setInput("");
+
+    if (intent) {
+      setPendingPayment(intent);
+
+      sendMessage({
+        role: "assistant",
+        parts: [
+          {
+            type: "text",
+            text: `Do you want to pay ₹${intent.amount} to ${intent.recipient} via Google Pay?`,
+          },
+        ],
+      });
+    }
 
     if (width && width > 768) {
       textareaRef.current?.focus();
@@ -398,7 +408,6 @@ function PureMultimodalInput({
               disabled={status !== "ready"}
               onResult={(text) => {
 
-                setInput("");
                 // 1️⃣ Detect payment intent
                 const intent = detectPaymentIntent(text);
 
