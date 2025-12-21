@@ -145,28 +145,16 @@ function PureMultimodalInput({
     const text = input.trim();
     if (!text) return;
 
+    if (pendingPayment && isConfirmation(text)) {
+      setConfirmedPayment(pendingPayment);
+      setPendingPayment(null);
+      setInput("");
+      setLocalStorageInput("");
+      resetHeight();
+      return;
+    }
+
     const intent = detectPaymentIntent(text);
-
-    sendMessage({
-      role: "user",
-      parts: [
-        ...attachments.map((attachment) => ({
-          type: "file" as const,
-          url: attachment.url,
-          name: attachment.name,
-          mediaType: attachment.contentType,
-        })),
-        {
-          type: "text",
-          text: input,
-        },
-      ],
-    });
-
-    setInput("");
-    setAttachments([]);
-    setLocalStorageInput("");
-    resetHeight();
 
     if (intent) {
       setPendingPayment(intent);
@@ -184,9 +172,30 @@ function PureMultimodalInput({
           ],
         },
       ]);
-
-
+      setInput("");
+      setAttachments([]);
+      setLocalStorageInput("");
+      resetHeight();
+      return;
     }
+
+
+
+    sendMessage({
+      role: "user",
+      parts: [
+        ...attachments.map((attachment) => ({
+          type: "file" as const,
+          url: attachment.url,
+          name: attachment.name,
+          mediaType: attachment.contentType,
+        })),
+        {
+          type: "text",
+          text: input,
+        },
+      ],
+    });
 
     if (width && width > 768) {
       textareaRef.current?.focus();
