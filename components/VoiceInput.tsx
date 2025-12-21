@@ -1,7 +1,7 @@
 "use client";
 
 import { Mic, MicOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 export function VoiceInput({
   onResult,
@@ -11,9 +11,10 @@ export function VoiceInput({
   disabled?: boolean;
 }) {
   const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   const startListening = () => {
-    if (disabled) return;
+    if (disabled || listening) return;
 
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -25,15 +26,37 @@ export function VoiceInput({
     }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = "en-IN";
+    recognitionRef.current = recognition;
+
+    recognition.lang = "en-IN"; // best for Hinglish + English
     recognition.interimResults = false;
     recognition.continuous = false;
+    recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => setListening(true);
-    recognition.onend = () => setListening(false);
+    recognition.onstart = () => {
+      console.log("🎤 Listening...");
+      setListening(true);
+    };
+
+    recognition.onspeechend = () => {
+      console.log("🛑 Speech ended");
+      recognition.stop();
+    };
 
     recognition.onresult = (event: any) => {
-      onResult(event.results[0][0].transcript);
+      const transcript = event.results[0][0].transcript;
+      console.log("✅ Heard:", transcript);
+      onResult(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("❌ Speech error:", event.error);
+      setListening(false);
+    };
+
+    recognition.onend = () => {
+      console.log("🔚 Recognition ended");
+      setListening(false);
     };
 
     recognition.start();
