@@ -23,7 +23,6 @@ import { SelectItem } from "@/components/ui/select";
 import { PaymentController } from "@/components/payments/PaymentController";
 import { detectPaymentIntent } from "@/lib/payments/intent";
 import { isConfirmation } from "@/lib/payments/confirmation";
-import { QrPaymentModal } from "@/components/payments/QrPaymentModal";
 import type { PaymentIntent } from "@/lib/payments/intent";
 import { chatModels } from "@/lib/ai/models";
 import type { Attachment, ChatMessage } from "@/lib/types";
