@@ -144,6 +144,10 @@ function PureMultimodalInput({
 
     const text = input.trim();
     if (!text) return;
+    setInput("");
+    setAttachments([]);
+    setLocalStorageInput("");
+    resetHeight();
 
     if (pendingPayment && isConfirmation(text)) {
       setConfirmedPayment(pendingPayment);
@@ -172,10 +176,6 @@ function PureMultimodalInput({
           ],
         },
       ]);
-      setInput("");
-      setAttachments([]);
-      setLocalStorageInput("");
-      resetHeight();
       return;
 
     }
@@ -421,6 +421,7 @@ function PureMultimodalInput({
             <VoiceInput
               disabled={status !== "ready"}
               onResult={(text) => {
+                setInput("");
 
                 // 1️⃣ Detect payment intent
                 const intent = detectPaymentIntent(text);
